@@ -42,9 +42,6 @@ public class AppContainerController: NiblessViewController {
     
     subscribe(sharedViewModel.view.asObservable())
     
-    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-      self.sharedViewModel.gotoLogin()
-    }
   }
   
   func subscribe(_ observable: Observable<AppNavigationAction>) {
@@ -104,6 +101,7 @@ public class AppContainerController: NiblessViewController {
       self.loginViewController = viewControllerToPresent
     }
     
+    viewControllerToPresent.modalPresentationStyle = .fullScreen
     present(viewControllerToPresent, animated: true)
   }
   

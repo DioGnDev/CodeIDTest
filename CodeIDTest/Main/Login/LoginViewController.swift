@@ -24,10 +24,6 @@ public class LoginViewController: NiblessViewController {
     print("current_vc: - \(self.self)")
     
     view.backgroundColor = .brown
-    
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-      self.navigator.navigateToSignedIn()
-    }
   }
   
   deinit {
