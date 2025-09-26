@@ -27,7 +27,7 @@ public class LoginViewController: NiblessViewController {
     
     observer()
     
-    useCase.login()
+    useCase.login(name: "test", email: "test@gmail.com")
     
   }
   

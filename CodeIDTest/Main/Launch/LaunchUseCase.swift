@@ -23,7 +23,7 @@ public class LaunchUseCase {
   public func loadUserSession() {
     userSessionRepository
       .readUsersession()
-      .observe(on: MainScheduler.asyncInstance)
+      .observe(on: MainScheduler.instance)
       .map { $0! }
       .subscribe { [weak self] session in
         self?.navigateToList.onNext(session)

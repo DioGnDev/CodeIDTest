@@ -32,10 +32,6 @@ public class SignedInContainerController: NiblessNavigationController {
     super.viewDidLoad()
     
     subscribe(viewModel.view.asObservable())
-    
-    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-      self.viewModel.navigateToDetail(argument: "")
-    }
   }
   
   private func subscribe(_ observable: Observable<SignedInNavigationAction>) {

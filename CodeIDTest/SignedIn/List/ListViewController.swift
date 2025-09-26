@@ -15,6 +15,7 @@ public class ListViewController: NiblessViewController {
     print("current_vc: - \(self.self)")
     
     view.backgroundColor = .yellow
+    
   }
   
   deinit {

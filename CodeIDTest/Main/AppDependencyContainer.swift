@@ -60,8 +60,16 @@ public class AppDependencyContainer {
   }
   
   private func makeLoginViewController() -> LoginViewController {
+    
+    func makeUseCase() -> LoginUseCase {
+      return LoginUseCase(
+        userSessionRepository: userSessionRepository,
+        navigator: sharedViewModel
+      )
+    }
+    
     return LoginViewController(
-      useCase: LoginUseCase(userSessionRepository: userSessionRepository),
+      useCase: makeUseCase(),
       navigator: sharedViewModel
     )
   }
