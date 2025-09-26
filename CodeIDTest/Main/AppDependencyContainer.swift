@@ -6,18 +6,22 @@
 //
 
 import Foundation
+import UIKit
+import CoreData
 
 public class AppDependencyContainer {
   
   //MARK: - Long Lived Dependency
+  private let context: NSManagedObjectContext
   private let userSessionRepository: UserSessionRepository
   private let sharedViewModel: AppViewModel
   
-  public init() {
+  public init(context: NSManagedObjectContext) {
     func makeUserSessionRepository() -> UserSessionRepository {
       return UserDefaultSessionRepository()
     }
     
+    self.context = context
     self.userSessionRepository = makeUserSessionRepository()
     self.sharedViewModel = AppViewModel()
   }

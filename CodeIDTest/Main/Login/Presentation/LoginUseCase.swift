@@ -12,6 +12,7 @@ public class LoginUseCase {
   
   private let userSessionRepository: UserSessionRepository
   private let navigator: AppNavigator
+  public let showError = PublishSubject<String>()
   
   private var disposeBag = DisposeBag()
   
@@ -29,8 +30,9 @@ public class LoginUseCase {
       .map { $0! }
       .subscribe { [weak self] userSession in
         self?.navigator.navigateToSignedIn(userSession)
-      } onFailure: { error in
-        
+      } onFailure: { [weak self] error in
+        guard let error = error as? ErrorMessage else { return }
+        self?.showError.onNext(error.message)
       }.disposed(by: disposeBag)
     
   }
