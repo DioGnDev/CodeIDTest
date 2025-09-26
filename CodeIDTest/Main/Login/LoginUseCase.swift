@@ -10,4 +10,19 @@ import RxSwift
 
 public class LoginUseCase {
   
+  private let userSessionRepository: UserSessionRepository
+  private let loginRepository: LoginRepository
+  
+  public init(
+    userSessionRepository: UserSessionRepository,
+    loginRepository: LoginRepository
+  ) {
+    self.userSessionRepository = userSessionRepository
+    self.loginRepository = loginRepository
+  }
+  
+  public func login() {
+    
+  }
+  
 }

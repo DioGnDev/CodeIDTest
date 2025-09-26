@@ -9,8 +9,10 @@ public class SignedInDependencyContainer {
   
   //MARK: - Long Lived Dependency
   private let sharedViewModel: SignedInViewModel
+  private let userSession: UserSession
   
-  public init() {
+  public init(userSession: UserSession) {
+    self.userSession = userSession
     self.sharedViewModel = SignedInViewModel()
   }
   

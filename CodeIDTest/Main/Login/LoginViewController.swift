@@ -9,11 +9,11 @@ import UIKit
 
 public class LoginViewController: NiblessViewController {
   
-  private let usecase: LoginUseCase
+  private let useCase: LoginUseCase
   private let navigator: AppNavigator
   
-  public init(usecase: LoginUseCase, navigator: AppNavigator) {
-    self.usecase = usecase
+  public init(useCase: LoginUseCase, navigator: AppNavigator) {
+    self.useCase = useCase
     self.navigator = navigator
     super.init()
   }
@@ -24,6 +24,15 @@ public class LoginViewController: NiblessViewController {
     print("current_vc: - \(self.self)")
     
     view.backgroundColor = .brown
+    
+    observer()
+    
+    useCase.login()
+    
+  }
+  
+  private func observer() {
+    
   }
   
   deinit {

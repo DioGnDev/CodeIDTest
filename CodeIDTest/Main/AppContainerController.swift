@@ -15,7 +15,7 @@ public class AppContainerController: NiblessViewController {
   
   let makeLaunchViewController: () -> LaunchViewController
   let makeLoginViewController: () -> LoginViewController
-  let makeSignedInViewController: () -> SignedInContainerController
+  let makeSignedInViewController: (UserSession) -> SignedInContainerController
   
   var launchViewController: LaunchViewController?
   var loginViewController: LoginViewController?
@@ -27,7 +27,7 @@ public class AppContainerController: NiblessViewController {
     sharedViewModel: AppViewModel,
     makeLaunchViewControllerFactory: @escaping() -> LaunchViewController,
     makeLoginViewControllerFactory: @escaping () -> LoginViewController,
-    makeSignedInViewControllerFactory: @escaping () -> SignedInContainerController
+    makeSignedInViewControllerFactory: @escaping (UserSession) -> SignedInContainerController
   ) {
     self.sharedViewModel = sharedViewModel
     self.makeLaunchViewController = makeLaunchViewControllerFactory
@@ -44,7 +44,7 @@ public class AppContainerController: NiblessViewController {
     
   }
   
-  func subscribe(_ observable: Observable<AppNavigationAction>) {
+  private func subscribe(_ observable: Observable<AppNavigationAction>) {
     observable
       .observe(on: MainScheduler.instance)
       .subscribe(
@@ -58,7 +58,7 @@ public class AppContainerController: NiblessViewController {
       .disposed(by: disposeBag)
   }
   
-  func respond(_ navigation: AppNavigationAction) {
+  private func respond(_ navigation: AppNavigationAction) {
     switch navigation {
     case .present(let view):
       self.present(view)
@@ -73,8 +73,8 @@ public class AppContainerController: NiblessViewController {
       presentLaunch()
     case .login:
       presentLogin()
-    case .signedIn:
-      presentSignedIn()
+    case .signedIn(let userSession):
+      presentSignedIn(userSession)
     }
   }
   
@@ -105,7 +105,7 @@ public class AppContainerController: NiblessViewController {
     present(viewControllerToPresent, animated: true)
   }
   
-  private func presentSignedIn() {
+  private func presentSignedIn(_ userSession: UserSession) {
     remove(childViewController: launchViewController)
     launchViewController = nil
     
@@ -119,7 +119,7 @@ public class AppContainerController: NiblessViewController {
     if let vc = self.signedViewController {
       viewControllerToPresent = vc
     } else {
-      viewControllerToPresent = makeSignedInViewController()
+      viewControllerToPresent = makeSignedInViewController(userSession)
       self.signedViewController = viewControllerToPresent
     }
     

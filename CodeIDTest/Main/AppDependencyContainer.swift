@@ -33,8 +33,8 @@ public class AppDependencyContainer {
       return self.makeLoginViewController()
     }
     
-    let signedInFactory = {
-      return self.makeSignedInViewController()
+    let signedInFactory = { userSession in
+      return self.makeSignedInViewController(userSession)
     }
     
     return AppContainerController(
@@ -47,18 +47,27 @@ public class AppDependencyContainer {
   }
   
   private func makeLaunchViewController() -> LaunchViewController {
-    return LaunchViewController()
-  }
-  
-  private func makeLoginViewController() -> LoginViewController {
-    return LoginViewController(
-      usecase: LoginUseCase(),
+    
+    func makeUseCase() -> LaunchUseCase {
+      return LaunchUseCase(userSessionRepository: userSessionRepository)
+    }
+    
+    return LaunchViewController(
+      useCase: makeUseCase(),
+      responder: sharedViewModel,
       navigator: sharedViewModel
     )
   }
   
-  private func makeSignedInViewController() -> SignedInContainerController {
-    return SignedInDependencyContainer().makeViewController()
+  private func makeLoginViewController() -> LoginViewController {
+    return LoginViewController(
+      useCase: LoginUseCase(userSessionRepository: userSessionRepository),
+      navigator: sharedViewModel
+    )
+  }
+  
+  private func makeSignedInViewController(_ userSession: UserSession) -> SignedInContainerController {
+    return SignedInDependencyContainer(userSession: userSession).makeViewController()
   }
   
 }

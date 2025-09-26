@@ -19,7 +19,7 @@ public struct UserDefaultSessionRepository: UserSessionRepository {
          let session = try? JSONDecoder().decode(UserSession.self, from: data) {
         single(.success(session))
       } else {
-        single(.success(nil))
+        single(.failure(ErrorMessage(title: "sorry", message: "No session found")))
       }
       return Disposables.create()
     }
