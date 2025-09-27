@@ -6,6 +6,6 @@
 //
 
 public protocol SignedInNavigator {
-  func navigateToList()
+  func navigateToTab()
   func navigateToDetail(argument: String)
 }

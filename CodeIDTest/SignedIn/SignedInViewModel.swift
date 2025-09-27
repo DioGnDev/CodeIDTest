@@ -8,7 +8,7 @@
 import RxSwift
 
 public enum SignedInView {
-  case list
+  case tab
   case detail
 }
 
@@ -16,10 +16,10 @@ public typealias SignedInNavigationAction = NavigationAction<SignedInView>
 
 public class SignedInViewModel {
   
-  public private(set) var view = BehaviorSubject<SignedInNavigationAction>(value: .present(view: .list))
+  public private(set) var view = BehaviorSubject<SignedInNavigationAction>(value: .present(view: .tab))
   
-  public func navigateToList() {
-    view.onNext(.present(view: .list))
+  public func navigateToTab() {
+    view.onNext(.present(view: .tab))
   }
   
   public func navigateToDetail(argument: String) {

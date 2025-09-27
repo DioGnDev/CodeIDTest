@@ -8,5 +8,7 @@
 import Foundation
 
 public protocol AppNavigator {
-  func navigateToSignedIn(_ userSession: UserSession)
+  func navigateToSignedIn()
+  func navigateToLogin()
+  func navigateToRegister()
 }

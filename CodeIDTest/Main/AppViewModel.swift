@@ -10,7 +10,8 @@ import RxSwift
 public enum AppView {
   case launching
   case login
-  case signedIn(UserSession)
+  case register
+  case signedIn
 }
 
 extension AppView: Equatable {
@@ -20,11 +21,14 @@ extension AppView: Equatable {
       return true
     case (.login, .login):
       return true
-    case let (.signedIn(l), .signedIn(r)):
-      return l == r
+    case (.signedIn, .signedIn):
+      return true
+    case (.register, .register):
+      return true
     case (.launching, _),
       (.login, _),
-      (.signedIn, _):
+      (.signedIn, _),
+      (.register, _):
       return false
     }
   }
@@ -40,12 +44,21 @@ public class AppViewModel {
     view.onNext(.present(view: .login))
   }
   
+  public func navigateToLogin() {
+    view.onNext(.present(view: .login))
+  }
   
-  public func navigateToSignedIn(_ userSession: UserSession) {
-    view.onNext(.present(view: .signedIn(userSession)))
+  public func navigateToRegister() {
+    view.onNext(.present(view: .register))
+  }
+  
+  public func navigateToSignedIn() {
+    view.onNext(.present(view: .signedIn))
   }
   
 }
 
 extension AppViewModel: LoginResponder,
-                        AppNavigator {}
+                        AppNavigator {
+ 
+}

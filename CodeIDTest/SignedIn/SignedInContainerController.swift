@@ -11,21 +11,23 @@ import RxSwift
 public class SignedInContainerController: NiblessNavigationController {
   
   let viewModel: SignedInViewModel
-  let listViewController: ListViewController
+  let pagerTabViewController: PokeTabViewController
   let detailViewController: DetailViewController
   
   var disposeBag = DisposeBag()
   
   public init(
     viewModel: SignedInViewModel,
-    listViewController: ListViewController,
+    pagerTabViewController: PokeTabViewController,
     detailViewController: DetailViewController
   ) {
     self.viewModel = SignedInViewModel()
-    self.listViewController = listViewController
+    self.pagerTabViewController = pagerTabViewController
     self.detailViewController = detailViewController
     
     super.init()
+    
+    self.delegate = self
   }
   
   public override func viewDidLoad() {
@@ -59,19 +61,39 @@ public class SignedInContainerController: NiblessNavigationController {
   
   private func present(_ view: SignedInView) {
     switch view {
-    case .list:
-      presentList()
+    case .tab:
+      presentPagerTab()
     case .detail:
       presentDetail()
     }
   }
   
-  private func presentList() {
-    pushViewController(listViewController, animated: true)
+  private func presentPagerTab() {
+    pushViewController(pagerTabViewController, animated: true)
   }
   
   private func presentDetail() {
     pushViewController(detailViewController, animated: true)
+  }
+  
+}
+
+extension SignedInContainerController: UINavigationControllerDelegate {
+  
+  public func navigationController(
+    _ navigationController: UINavigationController,
+    willShow viewController: UIViewController,
+    animated: Bool
+  ) {
+    setNavigationBarHidden(true, animated: false)
+  }
+  
+  public func navigationController(
+    _ navigationController: UINavigationController,
+    didShow viewController: UIViewController,
+    animated: Bool
+  ) {
+    setNavigationBarHidden(true, animated: false)
   }
   
 }

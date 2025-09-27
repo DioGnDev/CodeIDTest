@@ -33,25 +33,26 @@ public class LaunchViewController: NiblessViewController {
     
     print("current_vc: - \(self.self)")
     
-    view.backgroundColor = .purple
+    view.backgroundColor = .white
     
     observer()
     
     useCase.loadUserSession()
+      .subscribe { [weak self] state in
+        if state {
+          self?.navigator.navigateToSignedIn()
+        } else {
+          self?.responder.gotoLogin()
+        }
+      } onFailure: { [weak self] error in
+        guard let error = error as? ErrorMessage else { return }
+        self?.showErrorAlert(title: error.title, msg: error.message)
+      }
+      .disposed(by: disposeBag)
   }
   
   private func observer() {
-    useCase.presentLogin
-      .distinctUntilChanged()
-      .subscribe { [weak self] user in
-        self?.responder.gotoLogin()
-      }.disposed(by: disposeBag)
     
-    useCase.navigateToList
-      .distinctUntilChanged()
-      .subscribe { [weak self] session in
-        self?.navigator.navigateToSignedIn(session)
-      }.disposed(by: disposeBag)
   }
   
   deinit {

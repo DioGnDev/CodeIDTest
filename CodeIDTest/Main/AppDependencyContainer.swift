@@ -12,9 +12,13 @@ import CoreData
 public class AppDependencyContainer {
   
   //MARK: - Long Lived Dependency
-  private let context: NSManagedObjectContext
-  private let userSessionRepository: UserSessionRepository
-  private let sharedViewModel: AppViewModel
+  public let context: NSManagedObjectContext
+  public let userSessionRepository: UserSessionRepository
+  public let sharedViewModel: AppViewModel
+  public var userSession: UserSession!
+  public let service: Service
+  private var authDataSource: AuthDataSource!
+  private var authRepository: AuthRepository!
   
   public init(context: NSManagedObjectContext) {
     func makeUserSessionRepository() -> UserSessionRepository {
@@ -24,6 +28,9 @@ public class AppDependencyContainer {
     self.context = context
     self.userSessionRepository = makeUserSessionRepository()
     self.sharedViewModel = AppViewModel()
+    self.service = NetworkService()
+    self.authDataSource = AuthLocalDataSourceImpl(context: context)
+    self.authRepository = AuthRepositoryImpl(dataSource: authDataSource)
   }
   
   //MARK: - Make ViewController
@@ -37,23 +44,32 @@ public class AppDependencyContainer {
       return self.makeLoginViewController()
     }
     
-    let signedInFactory = { userSession in
-      return self.makeSignedInViewController(userSession)
+    let signedInFactory = {
+      return self.makeSignedInViewController()
+    }
+    
+    let registerFactory = {
+      return self.makeRegisterViewController()
     }
     
     return AppContainerController(
       sharedViewModel: sharedViewModel,
       makeLaunchViewControllerFactory: launchFactory,
       makeLoginViewControllerFactory: loginFactory,
-      makeSignedInViewControllerFactory: signedInFactory
+      makeSignedInViewControllerFactory: signedInFactory,
+      makeRegisterViewControllerFactory: registerFactory
     )
     
   }
   
   private func makeLaunchViewController() -> LaunchViewController {
+   
+    func makeRepository() -> IsSignedInRepository {
+      return LaunchRepositoryImpl(remote: authDataSource)
+    }
     
     func makeUseCase() -> LaunchUseCase {
-      return LaunchUseCase(userSessionRepository: userSessionRepository)
+      return LaunchUseCase(repo: makeRepository())
     }
     
     return LaunchViewController(
@@ -64,12 +80,8 @@ public class AppDependencyContainer {
   }
   
   private func makeLoginViewController() -> LoginViewController {
-    
     func makeUseCase() -> LoginUseCase {
-      return LoginUseCase(
-        userSessionRepository: userSessionRepository,
-        navigator: sharedViewModel
-      )
+      return LoginUseCase(authRepo: authRepository)
     }
     
     return LoginViewController(
@@ -78,9 +90,18 @@ public class AppDependencyContainer {
     )
   }
   
-  private func makeSignedInViewController(_ userSession: UserSession) -> SignedInContainerController {
-    return SignedInDependencyContainer(userSession: userSession).makeViewController()
+  private func makeRegisterViewController() -> RegisterViewController {
+    return RegisterViewController(
+      useCase: RegisterUseCase(authRepo: authRepository),
+      navigator: sharedViewModel
+    )
   }
+  
+  private func makeSignedInViewController() -> SignedInContainerController {
+    return SignedInDependencyContainer(dependencyInjection: self).makeViewController()
+  }
+  
+  
   
 }
 

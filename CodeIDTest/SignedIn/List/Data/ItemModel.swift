@@ -11,18 +11,18 @@ public struct ItemModel: Codable {
   public let count: Int
   public let next: String
   public let previous: JSONNull?
-  public let results: [Result]
+  public let results: [ItemDataModel]
   
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.count = try container.decode(Int.self, forKey: .count)
     self.next = try container.decode(String.self, forKey: .next)
     self.previous = try container.decodeIfPresent(JSONNull.self, forKey: .previous)
-    self.results = try container.decode([Result].self, forKey: .results)
+    self.results = try container.decode([ItemDataModel].self, forKey: .results)
   }
 }
 
-public struct Result: Codable {
+public struct ItemDataModel: Codable {
   public let name: String
   public let url: String
   

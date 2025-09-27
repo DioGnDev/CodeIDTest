@@ -10,31 +10,15 @@ import RxSwift
 
 public class LoginUseCase {
   
-  private let userSessionRepository: UserSessionRepository
-  private let navigator: AppNavigator
-  public let showError = PublishSubject<String>()
-  
+  private let authRepo: AuthRepository
   private var disposeBag = DisposeBag()
   
-  public init(
-    userSessionRepository: UserSessionRepository,
-    navigator: AppNavigator
-  ) {
-    self.userSessionRepository = userSessionRepository
-    self.navigator = navigator
+  public init(authRepo: AuthRepository) {
+    self.authRepo = authRepo
   }
   
-  public func login(name: String, email: String) {
-    userSessionRepository
-      .save(userSession: UserSession(name: name, email: email))
-      .map { $0! }
-      .subscribe { [weak self] userSession in
-        self?.navigator.navigateToSignedIn(userSession)
-      } onFailure: { [weak self] error in
-        guard let error = error as? ErrorMessage else { return }
-        self?.showError.onNext(error.message)
-      }.disposed(by: disposeBag)
-    
+  public func login(username: String, password: String) -> Single<Bool> {
+    authRepo.signIn(username: username, password: password)
   }
   
 }
