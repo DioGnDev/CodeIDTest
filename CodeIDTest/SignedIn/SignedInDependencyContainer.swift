@@ -34,7 +34,7 @@ public class SignedInDependencyContainer {
   
   private func makePokeTabViewController() -> PokeTabViewController {
     let listFactory = {
-      self.makeListViewController()
+      self.makePokeListViewController()
     }
     
     let profileFactory = {
@@ -47,7 +47,30 @@ public class SignedInDependencyContainer {
     )
   }
   
-  private func makeListViewController() -> ListViewController {
+//  private func makeListViewController() -> ListViewController {
+//    func makeRemote() -> ListRemoteDataSource {
+//      return ListRemoteDataSourceImpl(service: service)
+//    }
+//    
+//    func makeRepository() -> ListRepository {
+//      return ListRepositoryImpl(remote: makeRemote())
+//    }
+//    
+//    func makeCachedRepository() -> CachedRepository {
+//      return CachedRepositoryImpl(context: context)
+//    }
+//    
+//    func makeUseCase() -> ListUseCase {
+//      return ListUseCase(
+//        repository: makeRepository(),
+//        cache: makeCachedRepository()
+//      )
+//    }
+//    
+//    return ListViewController(useCase: makeUseCase())
+//  }
+  
+  private func makePokeListViewController() -> PokeListViewController {
     func makeRemote() -> ListRemoteDataSource {
       return ListRemoteDataSourceImpl(service: service)
     }
@@ -67,7 +90,7 @@ public class SignedInDependencyContainer {
       )
     }
     
-    return ListViewController(useCase: makeUseCase())
+    return PokeListViewController(useCase: makeUseCase())
   }
   
   private func makeDetailViewController() -> DetailViewController {

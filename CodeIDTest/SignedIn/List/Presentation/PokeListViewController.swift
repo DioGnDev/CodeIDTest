@@ -8,17 +8,19 @@
 import Foundation
 import UIKit
 import RxSwift
+import XLPagerTabStrip
 
-public class PokeListViewController: NiblessViewController {
+public class PokeListViewController: NiblessViewController, IndicatorInfoProvider {
   
   //Dependency
   let useCase: ListUseCase
   
   //Property
-  var items: [PokeItem] = []
-  var currentPage: Int = 0
+  var items: [PokeEntity] = []
   
   private let disposeBag = DisposeBag()
+  
+  private var footerView: LoadingFooterView!
   
   lazy var tableView: UITableView = {
     let tv = UITableView(frame: .zero)
@@ -27,6 +29,7 @@ public class PokeListViewController: NiblessViewController {
     tv.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     tv.backgroundColor = .white
     tv.translatesAutoresizingMaskIntoConstraints = false
+    tv.tableFooterView = footerView
     return tv
   }()
   
@@ -46,7 +49,7 @@ public class PokeListViewController: NiblessViewController {
     setupView()
     
     useCase.loadItems()
-      .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .background))
+      .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
       .observe(on: MainScheduler.instance)
       .subscribe { [weak self] item in
         self?.items = item
@@ -55,6 +58,9 @@ public class PokeListViewController: NiblessViewController {
   }
   
   private func setupView() {
+    footerView = LoadingFooterView(frame: .init(x: 0, y: 0, width: tableView.bounds.width, height: 60))
+    tableView.tableFooterView = footerView
+    
     view.addSubview(tableView)
     NSLayoutConstraint.activate([
       tableView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -62,6 +68,24 @@ public class PokeListViewController: NiblessViewController {
       tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
       tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
     ])
+  }
+  
+  public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    if (scrollView.contentOffset.y + scrollView.frame.size.height >= scrollView.contentSize.height) {
+      let position = scrollView.contentOffset.y
+      if position > (tableView.contentSize.height - 50 - scrollView.frame.size.height) {
+        footerView.startLoading()
+        
+        useCase.loadMore()
+          .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+          .observe(on: MainScheduler.instance)
+          .subscribe { [weak self] item in
+            self?.items.append(contentsOf: item)
+            self?.tableView.reloadData()
+            self?.footerView.stopLoading()
+          }.disposed(by: disposeBag)
+      }
+    }
   }
   
   deinit {
@@ -93,6 +117,11 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
     cell.textLabel?.text = item.name
     
     return cell
+  }
+  
+  public func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
+    
+    return "Pokemon"
   }
   
 }

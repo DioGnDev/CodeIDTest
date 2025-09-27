@@ -8,17 +8,17 @@
 import RxSwift
 
 public protocol ListRemoteDataSource {
-  func fetchPokemon() -> Single<ItemModel>
+  func fetchPokemon(next: String?) -> Observable<ItemModel>
 }
 
 public struct ListRemoteDataSourceImpl: ListRemoteDataSource {
   
   let service: Service
   
-  public func fetchPokemon() -> Single<ItemModel> {
+  public func fetchPokemon(next: String?) -> Observable<ItemModel> {
     return self.service.request(
       of: ItemModel.self,
-      with: Endpoint.POKEMON,
+      with: next ?? Endpoint.POKEMON,
       withMethod: .get,
       withHeaders: [:],
       withParameter: [:],

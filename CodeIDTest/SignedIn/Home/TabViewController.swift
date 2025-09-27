@@ -41,7 +41,7 @@ public class TabViewController: ButtonBarPagerTabStripViewController {
   }
   
   public override func viewControllers(for pagerTabStripController: PagerTabStripViewController) -> [UIViewController] {
-    let listVC = ListViewController(useCase: ListUseCase(
+    let listVC = PokeListViewController(useCase: ListUseCase(
       repository: ListRepositoryImpl(remote: ListRemoteDataSourceImpl(service: NetworkService())),
       cache: CachedRepositoryImpl(
         context: (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext

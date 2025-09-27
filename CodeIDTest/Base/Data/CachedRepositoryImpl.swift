@@ -54,14 +54,28 @@ public class CachedRepositoryImpl: CachedRepository {
     }
   }
   
-  public func fetchCachedItems() -> Single<[PokeItem]> {
-    return Single.create { single in
+  public func update(items: [ItemDataModel]) {
+    for item in items {
+      let entity = PokeItem(context: context)
+      entity.id = UUID()
+      entity.name = item.name
+      entity.lastUpdatedAt = Date()
+      
+      if context.hasChanges {
+        try? context.save()
+      }
+    }
+  }
+  
+  public func fetchCachedItems() -> Observable<[PokeEntity]> {
+    return Observable.create { observer in
       let request: NSFetchRequest<PokeItem> = PokeItem.fetchRequest()
       do {
         let result = try self.context.fetch(request)
-        single(.success(result))
+        let entity = result.map { PokeEntity(id: $0.id ?? UUID(), name: $0.name ?? "") }
+        observer.onNext(entity)
       } catch {
-        single(.failure(ErrorMessage(title: "error", message: "no data found")))
+        observer.onError(ErrorMessage(title: "error", message: "no data found"))
       }
       
       return Disposables.create()

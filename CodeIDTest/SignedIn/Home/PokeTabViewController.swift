@@ -14,11 +14,11 @@ public class PokeTabViewController: ButtonBarPagerTabStripViewController {
   let graySpotifyColor = UIColor(red: 21/255.0, green: 21/255.0, blue: 24/255.0, alpha: 1.0)
   let darkGraySpotifyColor = UIColor(red: 19/255.0, green: 20/255.0, blue: 20/255.0, alpha: 1.0)
   
-  private let makeListViewController: () -> ListViewController
+  private let makeListViewController: () -> PokeListViewController
   private let makeProfileViewController: () -> ProfileViewController
   
   public init(
-    makeListViewController: @escaping () -> ListViewController,
+    makeListViewController: @escaping () -> PokeListViewController,
     makeProfileViewController: @escaping () -> ProfileViewController
   ) {
     self.makeListViewController = makeListViewController
@@ -46,8 +46,6 @@ public class PokeTabViewController: ButtonBarPagerTabStripViewController {
     settings.style.buttonBarLeftContentInset = 0
     settings.style.buttonBarRightContentInset = 0
     
-    super.viewDidLoad()
-    
     view.backgroundColor = .white
     
     changeCurrentIndexProgressive = { (
@@ -62,6 +60,7 @@ public class PokeTabViewController: ButtonBarPagerTabStripViewController {
       newCell?.label.textColor = .white
     }
     
+    super.viewDidLoad()
   }
   
   public override func viewControllers(for pagerTabStripController: PagerTabStripViewController) -> [UIViewController] {

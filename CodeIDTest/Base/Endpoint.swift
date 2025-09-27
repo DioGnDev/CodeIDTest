@@ -6,5 +6,5 @@
 //
 
 enum Endpoint {
-  public static let POKEMON = "https://pokeapi.co/api/v2/pokemon/"
+  public static let POKEMON = "https://pokeapi.co/api/v2/pokemon/?offset=0&limit=10"
 }

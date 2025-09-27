@@ -15,8 +15,8 @@ public class ListRepositoryImpl: ListRepository {
     self.remote = remote
   }
   
-  public func fetchPokeList() -> Single<ItemModel> {
-    return remote.fetchPokemon()
+  public func fetchPokeList(next: String?) -> Observable<ItemModel> {
+    return remote.fetchPokemon(next: next)
   }
   
 }

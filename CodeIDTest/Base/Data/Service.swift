@@ -18,7 +18,7 @@ public protocol Service {
     withHeaders headers: [String: String],
     withParameter parameters: [String: Any],
     withEncoding encoding: Encoding?
-  ) -> Single<T>
+  ) -> Observable<T>
   
 }
 
@@ -77,39 +77,40 @@ public class NetworkService: Service {
     withHeaders headers: [String : String],
     withParameter parameters: [String : Any],
     withEncoding encoding: Encoding?
-  ) -> Single<T> where T : Decodable, T : Encodable {
+  ) -> Observable<T> where T : Decodable, T : Encodable {
     
     var httpHeaders: HTTPHeaders = []
     for (k, v) in headers {
       httpHeaders.add(name: k, value: v)
     }
     
-    return self.createSingle(
+    return self.createObservable(
       with: url,
       withMethod: method?.getMethod() ?? .get,
       withHeaders: httpHeaders,
       withParameter: parameters,
       withEncoding: encoding?.getEncoding() ?? URLEncoding.default
     )
-    .flatMap { data -> Single<T> in
+    .flatMap { data -> Observable<T> in
       do {
         let decoded = try JSONDecoder().decode(T.self, from: data)
         return .just(decoded)
       } catch {
+        GLogger(.error, layer: "presentation", message: "error \(error)")
         return .error(ErrorMessage(title: "error", message: error.localizedDescription))
       }
     }
   }
   
-  private func createSingle(
+  private func createObservable(
     with url: String,
     withMethod method: HTTPMethod = .get,
     withHeaders headers: HTTPHeaders = [:],
     withParameter parameters: Parameters = [:],
     withEncoding encoding: ParameterEncoding = URLEncoding.default
-  ) -> Single<Data> {
+  ) -> Observable<Data> {
     
-    return Single.create { [weak self] single in
+    return Observable.create { [weak self] observer in
       let request = AF.request(
         url,
         method: method,
@@ -122,9 +123,9 @@ public class NetworkService: Service {
           self?.validateStatusCode(response) { result in
             switch result {
             case .success(let data):
-              single(.success(data))
+              observer.onNext(data)
             case .failure(let error):
-              single(.failure(error))
+              observer.onError(error)
             }
           }
         }

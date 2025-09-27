@@ -9,8 +9,6 @@ import UIKit
 import XLPagerTabStrip
 
 public class ProfileViewController: NiblessViewController, IndicatorInfoProvider {
-  
-  var itemInfo = IndicatorInfo(title: "View")
 
   public override func viewDidLoad() {
     super.viewDidLoad()
@@ -22,7 +20,7 @@ public class ProfileViewController: NiblessViewController, IndicatorInfoProvider
   
   public func indicatorInfo(for pagerTabStripController: PagerTabStripViewController) -> IndicatorInfo {
     
-    return itemInfo
+    return "Profile"
   }
   
 }
