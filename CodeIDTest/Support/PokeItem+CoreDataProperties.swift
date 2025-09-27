@@ -2,7 +2,7 @@
 //  PokeItem+CoreDataProperties.swift
 //  CodeIDTest
 //
-//  Created by Ilham Prabawa on 26/09/25.
+//  Created by Ilham Prabawa on 27/09/25.
 //
 //
 
@@ -18,7 +18,7 @@ extension PokeItem {
   
   @NSManaged public var id: UUID?
   @NSManaged public var name: String?
-  @NSManaged public var url: String?
+  @NSManaged public var lastUpdatedAt: Date?
   
 }
 
