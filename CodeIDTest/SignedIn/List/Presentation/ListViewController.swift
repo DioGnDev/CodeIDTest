@@ -6,20 +6,40 @@
 //
 
 import UIKit
+import RxSwift
+import XLPagerTabStrip
 
-public class ListViewController: NiblessViewController {
+public class ListViewController: BaseTableViewController, IndicatorInfoProvider {
+  
+  let useCase: ListUseCase
+  var itemInfo = IndicatorInfo(title: "View")
+  
+  private let disposeBag = DisposeBag()
+  
+  public init(useCase: ListUseCase) {
+    self.useCase = useCase
+  }
   
   public override func viewDidLoad() {
     super.viewDidLoad()
-    
+   
     print("current_vc: - \(self.self)")
     
-    view.backgroundColor = .yellow
-    
+    useCase.loadItems()
+      .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .default))
+      .observe(on: MainScheduler.instance)
+      .subscribe(onSuccess: { [weak self] results in
+        self?.items = results.map { PokeTableItemModel(
+          id: $0.id?.uuidString ?? "",
+          type: PokeTableViewCell.self,
+          identifier: PokeTableViewCell.identifier,
+          name: $0.name ?? ""
+        )}
+      }).disposed(by: disposeBag)
   }
   
-  deinit {
-    print("deinit: - \(self.self)")
+  public func indicatorInfo(for pagerTabStripController: PagerTabStripViewController) -> IndicatorInfo {
+    return itemInfo
   }
   
 }

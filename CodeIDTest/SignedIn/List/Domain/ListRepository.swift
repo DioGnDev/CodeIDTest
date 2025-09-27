@@ -8,5 +8,5 @@
 import RxSwift
 
 public protocol ListRepository {
-  func fetchPokeList() -> Single<[PokeItem]>
+  func fetchPokeList() -> Single<ItemModel>
 }

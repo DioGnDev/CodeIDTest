@@ -9,10 +9,14 @@ import RxSwift
 
 public class ListRepositoryImpl: ListRepository {
   
-  public func fetchPokeList() -> Single<[PokeItem]> {
-    return Single.create { single in
-      return Disposables.create()
-    }
+  private let remote: ListRemoteDataSource
+  
+  public init(remote: ListRemoteDataSource) {
+    self.remote = remote
+  }
+  
+  public func fetchPokeList() -> Single<ItemModel> {
+    return remote.fetchPokemon()
   }
   
 }

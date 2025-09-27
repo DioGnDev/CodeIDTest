@@ -7,32 +7,46 @@
 
 import RxSwift
 
-public struct ListUseCase {
+public class ListUseCase {
   
-  let listRepository: ListRepository
-  let dbRepository: DatabaseRepository
+  let repository: ListRepository
+  let cache: CachedRepository
   
   private var disposeBag = DisposeBag()
   
   public init(
-    listRepository: ListRepository,
-    dbRepository: DatabaseRepository
+    repository: ListRepository,
+    cache: CachedRepository
   ) {
-    self.listRepository = listRepository
-    self.dbRepository = dbRepository
+    self.repository = repository
+    self.cache = cache
   }
   
-  func fetchFromAPI() {
-    listRepository
-      .fetchPokeList()
-      .flatMap { dbRepository.savePokeItem(items: $0) }
-      .subscribe { state in
-        
-      } onFailure: { error in
-        
+  public func loadItems() -> Single<[PokeItem]> {
+    return cache.fetchCachedItems()
+      .flatMap(handleCachedValidation(_:))
+  }
+  
+  private func handleCachedValidation(_ cached: [PokeItem]) -> Single<[PokeItem]> {
+    return cache.isCacheValid(cached)
+      .flatMap { [weak self] isValid -> Single<[PokeItem]> in
+        guard let self = self else { return .just([]) }
+        if isValid, !cached.isEmpty {
+          return .just(cached)
+        } else {
+          return self.fetchAndCachedFromAPI()
+        }
       }
-      .disposed(by: disposeBag)
   }
   
+  private func fetchAndCachedFromAPI() -> Single<[PokeItem]>{
+    return repository
+      .fetchPokeList()
+      .flatMap { [weak self] item in
+        guard let self = self else { return .just([]) }
+        self.cache.save(items: item.results)
+        return self.cache.fetchCachedItems()
+      }
+  }
   
 }
