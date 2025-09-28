@@ -59,6 +59,7 @@ public final class AuthLocalDataSourceImpl: AuthDataSource {
            user.username == username && user.password == password {
           observer(.success(user.signedIn))
         } else {
+          GLogger(.error, layer: "data", message: users ?? [])
           observer(.failure(ErrorMessage(title: "Error", message: "please register first")))
         }
       } catch {
@@ -73,6 +74,11 @@ public final class AuthLocalDataSourceImpl: AuthDataSource {
       guard let self else { return Disposables.create() }
       self.context.perform {
         do {
+          let req: NSFetchRequest<User> = User.fetchRequest()
+          let all = try self.context.fetch(req)
+          all.forEach { self.context.delete($0) }
+          try self.saveIfNeeded()
+          
           if let session = try self.fetchOrNil() {
             session.signedIn = false
             try self.saveIfNeeded()

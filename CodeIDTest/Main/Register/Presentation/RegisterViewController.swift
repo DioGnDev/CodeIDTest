@@ -45,6 +45,7 @@ public class RegisterViewController: NiblessViewController {
     tf.placeholder = "Enter email here"
     tf.accessibilityIdentifier = "usernameTF"
     tf.isAccessibilityElement = true
+    tf.autocapitalizationType = .none
     tf.translatesAutoresizingMaskIntoConstraints = false
     return tf
   }()
@@ -175,7 +176,7 @@ public class RegisterViewController: NiblessViewController {
       password: password
     )
     .subscribe { [weak self] _ in
-      self?.navigator.navigateToSignedIn()
+      self?.navigator.navigateToLogin()
       self?.hideLoading()
     } onFailure: { [weak self] error in
       guard let error = error as? ErrorMessage else { return }

@@ -18,16 +18,16 @@ public class ProfileViewController: NiblessViewController, IndicatorInfoProvider
   
   private let nameLabel: UILabel = {
     let label = UILabel()
-    label.font = .boldSystemFont(ofSize: 24)
-    label.textColor = UIColor.black
+    label.font = .systemFont(ofSize: 24, weight: .semibold)
+    label.textColor = .black
     label.translatesAutoresizingMaskIntoConstraints = false
     return label
   }()
   
   private let emailLabel: UILabel = {
     let label = UILabel()
-    label.font = .boldSystemFont(ofSize: 16)
-    label.textColor = UIColor.systemBlue
+    label.font = .systemFont(ofSize: 24, weight: .semibold)
+    label.textColor = .black
     label.translatesAutoresizingMaskIntoConstraints = false
     return label
   }()
@@ -39,6 +39,16 @@ public class ProfileViewController: NiblessViewController, IndicatorInfoProvider
     button.isEnabled = true
     button.translatesAutoresizingMaskIntoConstraints = false
     return button
+  }()
+  
+  private let stackView: UIStackView = {
+    let sv = UIStackView()
+    sv.axis = .vertical
+    sv.spacing = 16
+    sv.alignment = .fill
+    sv.distribution = .fill
+    sv.translatesAutoresizingMaskIntoConstraints = false
+    return sv
   }()
   
   public init(
@@ -55,7 +65,7 @@ public class ProfileViewController: NiblessViewController, IndicatorInfoProvider
     
     print("current_vc: - \(self.self)")
     
-    view.backgroundColor = .yellow
+    view.backgroundColor = .white
     
     setupView()
     loadData()
@@ -63,16 +73,16 @@ public class ProfileViewController: NiblessViewController, IndicatorInfoProvider
   }
   
   fileprivate func setupView() {
-    view.addSubview(nameLabel)
-    view.addSubview(signOutButton)
+    
+    stackView.addArrangedSubview(nameLabel)
+    stackView.addArrangedSubview(emailLabel)
+    stackView.addArrangedSubview(signOutButton)
+    view.addSubview(stackView)
     
     NSLayoutConstraint.activate([
-      nameLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 100),
-      nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-      nameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-      signOutButton.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 16),
-      signOutButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -16),
-      signOutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+      stackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 50),
+      stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+      stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
     ])
     
     signOutButton.addTarget(self, action: #selector(signOut), for: .touchUpInside)
@@ -83,7 +93,8 @@ public class ProfileViewController: NiblessViewController, IndicatorInfoProvider
     useCase.getMet()
       .compactMap { $0! }
       .subscribe(onSuccess: { [weak self] session in
-        self?.nameLabel.text = session.name
+        self?.nameLabel.text = String(format: "Name: %@", session.name)
+        self?.emailLabel.text = String(format: "Email: %@", session.email)
       })
       .disposed(by: disposeBag)
   }

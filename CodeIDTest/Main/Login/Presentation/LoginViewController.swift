@@ -33,6 +33,7 @@ public class LoginViewController: NiblessViewController {
     tf.placeholder = "Enter username here"
     tf.accessibilityIdentifier = "usernameTF"
     tf.isAccessibilityElement = true
+    tf.autocapitalizationType = .none
     tf.translatesAutoresizingMaskIntoConstraints = false
     return tf
   }()

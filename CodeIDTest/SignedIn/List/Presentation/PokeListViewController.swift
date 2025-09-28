@@ -21,6 +21,7 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
   var items: [PokeEntity] = []
   var filteredItems: [PokeEntity] = []
   var isLoading: Bool = false
+  var isFirstTime: Bool = true
   
   //State
   private let disposeBag = DisposeBag()
@@ -36,14 +37,13 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     tv.backgroundColor = .white
     tv.translatesAutoresizingMaskIntoConstraints = false
     tv.tableFooterView = footerView
-    tv.tableHeaderView = searchBar
     return tv
   }()
   
   private lazy var searchBar: UISearchBar = {
     let sb = UISearchBar()
     sb.placeholder = "Search Pokémon"
-    sb.sizeToFit()
+    sb.translatesAutoresizingMaskIntoConstraints = false
     return sb
   }()
   
@@ -74,12 +74,18 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     tableView.tableFooterView = footerView
     footerView.stopLoading()
     
+    view.addSubview(searchBar)
     view.addSubview(tableView)
+    
     NSLayoutConstraint.activate([
-      tableView.topAnchor.constraint(equalTo: view.topAnchor),
-      tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+      searchBar.topAnchor.constraint(equalTo: view.topAnchor),
+      searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      searchBar.heightAnchor.constraint(equalToConstant: 50),
+      tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
       tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-      tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+      tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
     ])
   }
   
@@ -121,7 +127,8 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
             footerView.stopLoading()
             isLoading = false
             tableView.reloadData()
-          }.disposed(by: disposeBag)
+          }
+          .disposed(by: disposeBag)
       }
     }
   }
@@ -136,7 +143,7 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     MBProgressHUD.hide(for: self.view, animated: true)
   }
   
-  public func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
+  public func indicatorInfo(for pagerTabStripController: PagerTabStripViewController) -> IndicatorInfo {
     return "Pokemon"
   }
   
@@ -182,6 +189,7 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
     let item = filteredItems[indexPath.row]
     let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
     cell.textLabel?.text = item.name
+    cell.backgroundColor = .clear
     
     return cell
   }
@@ -201,7 +209,7 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
     forRowAt indexPath: IndexPath
   ) {
     
-    if tableView.contentSize.height < tableView.bounds.height {
+    if (tableView.contentSize.height < tableView.bounds.height) && isFirstTime {
       if !isLoading {
         isLoading = true
         useCase.loadMore()
@@ -216,6 +224,8 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
             tableView.reloadData()
           }.disposed(by: disposeBag)
       }
+      
+      isFirstTime = false
     }
   }
   

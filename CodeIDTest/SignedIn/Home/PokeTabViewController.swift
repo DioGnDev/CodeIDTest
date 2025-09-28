@@ -11,7 +11,7 @@ import XLPagerTabStrip
 public class PokeTabViewController: ButtonBarPagerTabStripViewController {
   
   var isReload = false
-  let graySpotifyColor = UIColor(red: 21/255.0, green: 21/255.0, blue: 24/255.0, alpha: 1.0)
+  let graySpotifyColor = UIColor(red: 60/255.0, green: 70/255.0, blue: 123/255.0, alpha: 1.0)
   let darkGraySpotifyColor = UIColor(red: 19/255.0, green: 20/255.0, blue: 20/255.0, alpha: 1.0)
   
   private let makeListViewController: () -> PokeListViewController
@@ -36,7 +36,7 @@ public class PokeTabViewController: ButtonBarPagerTabStripViewController {
     // change selected bar color
     settings.style.buttonBarBackgroundColor = graySpotifyColor
     settings.style.buttonBarItemBackgroundColor = graySpotifyColor
-    settings.style.selectedBarBackgroundColor = UIColor(red: 33/255.0, green: 174/255.0, blue: 67/255.0, alpha: 1.0)
+    settings.style.selectedBarBackgroundColor = .yellow
     settings.style.buttonBarItemFont = UIFont.systemFont(ofSize: 14)
     settings.style.selectedBarHeight = 3.0
     settings.style.buttonBarMinimumLineSpacing = 0
