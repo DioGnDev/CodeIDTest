@@ -17,6 +17,7 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
   
   //Property
   var items: [PokeEntity] = []
+  var isLoading: Bool = false
   
   private let disposeBag = DisposeBag()
   
@@ -48,18 +49,21 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     
     setupView()
     
+    isLoading = true
     useCase.loadItems()
       .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
       .observe(on: MainScheduler.instance)
       .subscribe { [weak self] item in
         self?.items = item
         self?.tableView.reloadData()
+        self?.isLoading = false
       }.disposed(by: disposeBag)
   }
   
   private func setupView() {
     footerView = LoadingFooterView(frame: .init(x: 0, y: 0, width: tableView.bounds.width, height: 60))
     tableView.tableFooterView = footerView
+    footerView.stopLoading()
     
     view.addSubview(tableView)
     NSLayoutConstraint.activate([
@@ -75,6 +79,7 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
       let position = scrollView.contentOffset.y
       if position > (tableView.contentSize.height - 50 - scrollView.frame.size.height) {
         footerView.startLoading()
+        isLoading = true
         
         useCase.loadMore()
           .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
@@ -83,9 +88,14 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
             self?.items.append(contentsOf: item)
             self?.tableView.reloadData()
             self?.footerView.stopLoading()
+            self?.isLoading = false
           }.disposed(by: disposeBag)
       }
     }
+  }
+  
+  public func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
+    return "Pokemon"
   }
   
   deinit {
@@ -119,9 +129,26 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
     return cell
   }
   
-  public func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
+  public func tableView(
+    _ tableView: UITableView,
+    willDisplay cell: UITableViewCell,
+    forRowAt indexPath: IndexPath
+  ) {
     
-    return "Pokemon"
+    if tableView.contentSize.height < tableView.bounds.height {
+      if !isLoading {
+        isLoading = true
+        useCase.loadMore()
+          .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+          .observe(on: MainScheduler.instance)
+          .subscribe { [weak self] item in
+            self?.items.append(contentsOf: item)
+            self?.tableView.reloadData()
+            self?.footerView.stopLoading()
+            self?.isLoading = false
+          }.disposed(by: disposeBag)
+      }
+    }
   }
   
 }
