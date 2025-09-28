@@ -44,8 +44,9 @@ public class AppContainerController: NiblessViewController {
   public override func viewDidLoad() {
     super.viewDidLoad()
     
-    subscribe(sharedViewModel.view.asObservable())
+    view.backgroundColor = .white
     
+    subscribe(sharedViewModel.view.asObservable())
   }
   
   private func subscribe(_ observable: Observable<AppNavigationAction>) {
@@ -98,6 +99,10 @@ public class AppContainerController: NiblessViewController {
   }
   
   private func presentLogin() {
+    if let _ = signedViewController {
+      remove(childViewController: signedViewController)
+      signedViewController = nil
+    }
     
     if let _ = registerViewController {
       dismiss(animated: true)
@@ -135,9 +140,6 @@ public class AppContainerController: NiblessViewController {
   }
   
   private func presentSignedIn() {
-    remove(childViewController: launchViewController)
-    launchViewController = nil
-    
     if let _ = loginViewController {
       dismiss(animated: true)
       loginViewController = nil

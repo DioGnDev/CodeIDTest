@@ -7,6 +7,7 @@
 
 import UIKit
 import RxSwift
+import MBProgressHUD
 
 public class RegisterViewController: NiblessViewController {
   
@@ -35,11 +36,24 @@ public class RegisterViewController: NiblessViewController {
     return tf
   }()
   
+  private let emailField: UITextField = {
+    let tf = UITextField()
+    tf.borderStyle = .roundedRect
+    tf.autocapitalizationType = .none
+    tf.keyboardType = .emailAddress
+    tf.tag = 1
+    tf.placeholder = "Enter email here"
+    tf.accessibilityIdentifier = "usernameTF"
+    tf.isAccessibilityElement = true
+    tf.translatesAutoresizingMaskIntoConstraints = false
+    return tf
+  }()
+  
   let passwordField : UITextField = {
     let tf = UITextField()
     tf.borderStyle = .roundedRect
     tf.isSecureTextEntry = true
-    tf.tag = 1
+    tf.tag = 2
     tf.placeholder = "Enter password here"
     tf.accessibilityIdentifier = "passwordTF"
     tf.isAccessibilityElement = true
@@ -92,6 +106,7 @@ public class RegisterViewController: NiblessViewController {
     stackView.translatesAutoresizingMaskIntoConstraints = false
     
     stackView.addArrangedSubview(usernameField)
+    stackView.addArrangedSubview(emailField)
     stackView.addArrangedSubview(passwordField)
     stackView.addArrangedSubview(signUpButton)
     stackView.addArrangedSubview(loginButton)
@@ -116,12 +131,23 @@ public class RegisterViewController: NiblessViewController {
     loginButton.addTarget(self, action: #selector(signIn), for: .touchUpInside)
   }
   
+  fileprivate func showLoading() {
+    let progressHUD = MBProgressHUD.showAdded(to: self.view, animated: true)
+    progressHUD.mode = .indeterminate
+    progressHUD.label.text = "Loading"
+  }
+  
+  fileprivate func hideLoading() {
+    MBProgressHUD.hide(for: self.view, animated: true)
+  }
+  
   private func observer() {
     let formValid = Observable.combineLatest(
       usernameField.rx.text.orEmpty,
-      passwordField.rx.text.orEmpty
-    ).map { username, password in
-      return !username.isEmpty && !password.isEmpty
+      passwordField.rx.text.orEmpty,
+      emailField.rx.text.orEmpty
+    ).map { username, password, email in
+      return !username.isEmpty && !password.isEmpty && !email.isEmpty
     }
     
     formValid
@@ -137,18 +163,24 @@ public class RegisterViewController: NiblessViewController {
   }
   
   @objc func signUp() {
+    showLoading()
+    
     let username = usernameField.text ?? ""
     let password = passwordField.text ?? ""
+    let email = emailField.text ?? ""
     
     useCase.register(
       username: username,
+      email: email,
       password: password
     )
     .subscribe { [weak self] _ in
       self?.navigator.navigateToSignedIn()
+      self?.hideLoading()
     } onFailure: { [weak self] error in
       guard let error = error as? ErrorMessage else { return }
       self?.showErrorAlert(title: error.title, msg: error.message)
+      self?.hideLoading()
     }.disposed(by: disposeBag)
   }
   

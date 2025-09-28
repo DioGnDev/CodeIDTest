@@ -16,8 +16,17 @@ public class RegisterUseCase {
     self.authRepo = authRepo
   }
   
-  func register(username: String, password: String) -> Single<Bool> {
-    authRepo.signUp(username: username, password: password)
+  func register(
+    username: String,
+    email: String,
+    password: String
+  ) -> Single<Bool> {
+    
+    authRepo.signUp(
+      username: username,
+      email: email,
+      password: password
+    )
   }
   
 }

@@ -13,6 +13,7 @@ public class SignedInDependencyContainer {
   
   //MARK: - Long Lived Dependency
   private let sharedViewModel: SignedInViewModel
+  private let mainViewModel: AppViewModel
   private let context: NSManagedObjectContext
   private let service: Service
   
@@ -20,6 +21,7 @@ public class SignedInDependencyContainer {
     self.context = dependencyInjection.context
     self.service = dependencyInjection.service
     self.sharedViewModel = SignedInViewModel()
+    self.mainViewModel = dependencyInjection.sharedViewModel
   }
   
   //MARK: - Make ViewController
@@ -118,7 +120,14 @@ public class SignedInDependencyContainer {
   }
   
   private func makeProfileViewController() -> ProfileViewController {
-    return ProfileViewController()
+    func makeRepo() -> UserSessionRepository {
+      return CoreDataUserSession(context: context)
+    }
+    
+    return ProfileViewController(
+      useCase: ProfileUseCase(userSessionRepo: makeRepo()),
+      responder: mainViewModel
+    )
   }
   
 }

@@ -28,8 +28,18 @@ public class AuthRepositoryImpl: AuthRepository, IsSignedInRepository {
     dataSource.signOut()
   }
   
-  public func signUp(username: String, password: String) -> Single<Bool> {
-    dataSource.signUp(username: username, password: password)
+  public func signUp(
+    username: String,
+    email: String,
+    password: String
+  ) -> Single<Bool> {
+    
+    dataSource.signUp(
+      username: username,
+      email: email,
+      password: password
+    )
+    
   }
   
 }

@@ -8,6 +8,7 @@
 import UIKit
 import RxSwift
 import RxCocoa
+import MBProgressHUD
 
 public class LoginViewController: NiblessViewController {
   
@@ -118,6 +119,16 @@ public class LoginViewController: NiblessViewController {
     registerButton.addTarget(self, action: #selector(signUp), for: .touchUpInside)
   }
   
+  fileprivate func showLoading() {
+    let progressHUD = MBProgressHUD.showAdded(to: self.view, animated: true)
+    progressHUD.mode = .indeterminate
+    progressHUD.label.text = "Loading"
+  }
+  
+  fileprivate func hideLoading() {
+    MBProgressHUD.hide(for: self.view, animated: true)
+  }
+  
   private func observer() {
     let formValid = Observable.combineLatest(
       usernameField.rx.text.orEmpty,
@@ -139,6 +150,8 @@ public class LoginViewController: NiblessViewController {
   }
   
   @objc func signIn() {
+    showLoading()
+    
     let username = usernameField.text ?? ""
     let password = passwordField.text ?? ""
     
@@ -148,9 +161,11 @@ public class LoginViewController: NiblessViewController {
     )
     .subscribe { [weak self] _ in
       self?.navigator.navigateToSignedIn()
+      self?.hideLoading()
     } onFailure: { [weak self] error in
       guard let error = error as? ErrorMessage else { return }
       self?.showErrorAlert(title: error.title, msg: error.message)
+      self?.hideLoading()
     }.disposed(by: disposeBag)
   }
   

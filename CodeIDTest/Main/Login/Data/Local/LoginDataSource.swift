@@ -11,8 +11,18 @@ import CoreData
 
 public protocol AuthDataSource {
   func fetch() -> Single<Bool>
-  func signIn(username: String, password: String) -> Single<Bool>
-  func signUp(username: String, password: String) -> Single<Bool>
+  
+  func signIn(
+    username: String,
+    password: String
+  ) -> Single<Bool>
+  
+  func signUp(
+    username: String,
+    email: String,
+    password: String
+  ) -> Single<Bool>
+  
   func signOut() -> Single<Bool>
 }
 
@@ -41,8 +51,6 @@ public final class AuthLocalDataSourceImpl: AuthDataSource {
   
   public func signIn(username: String, password: String) -> Single<Bool> {
     Single.create { [weak self] observer in
-      print("login mantab")
-      
       do {
         let request: NSFetchRequest<User> = User.fetchRequest()
         let users = try self?.context.fetch(request)
@@ -78,7 +86,12 @@ public final class AuthLocalDataSourceImpl: AuthDataSource {
     }
   }
   
-  public func signUp(username: String, password: String) -> Single<Bool> {
+  public func signUp(
+    username: String,
+    email: String,
+    password: String
+  ) -> Single<Bool> {
+    
     Single.create { [weak self] single in
       guard let self = self else { return Disposables.create() }
       self.context.perform {
@@ -86,6 +99,7 @@ public final class AuthLocalDataSourceImpl: AuthDataSource {
           let session = User(context: self.context)
           session.id = UUID()
           session.username = username
+          session.email = email
           session.password = password
           session.signedIn = true
           try self.saveIfNeeded()

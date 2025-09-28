@@ -33,6 +33,7 @@ public class SignedInContainerController: NiblessNavigationController {
   public override func viewDidLoad() {
     super.viewDidLoad()
     
+    view.backgroundColor = .white
     subscribe(viewModel.view.asObservable())
   }
   
@@ -40,8 +41,8 @@ public class SignedInContainerController: NiblessNavigationController {
     observable
       .observe(on: MainScheduler.instance)
       .subscribe(
-        onNext: { navigation in
-          self.respond(navigation)
+        onNext: { [weak self] navigation in
+          self?.respond(navigation)
         },
         onError: { _ in
           GLogger(.info, layer: "presentation", message: "error")

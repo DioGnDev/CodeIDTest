@@ -61,12 +61,18 @@ public class PokeTabViewController: ButtonBarPagerTabStripViewController {
     }
     
     super.viewDidLoad()
+    
+    print("current_vc: - \(self.self)")
   }
   
   public override func viewControllers(for pagerTabStripController: PagerTabStripViewController) -> [UIViewController] {
     let listVC = makeListViewController()
     let profileVC = makeProfileViewController()
     return [listVC, profileVC]
+  }
+  
+  deinit {
+    print("deinit: - \(self.self)")
   }
   
 }

@@ -119,7 +119,7 @@ public class NetworkService: Service {
         headers: headers
       ) { $0.timeoutInterval = 30 }
         .responseString(queue: .main, encoding: .utf8) { response in
-          self?.log(response)
+//          self?.log(response)
           self?.validateStatusCode(response) { result in
             switch result {
             case .success(let data):

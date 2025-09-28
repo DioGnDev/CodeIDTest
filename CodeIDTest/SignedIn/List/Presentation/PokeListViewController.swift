@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import RxSwift
 import XLPagerTabStrip
+import MBProgressHUD
 
 public class PokeListViewController: NiblessViewController, IndicatorInfoProvider {
   
@@ -26,14 +27,6 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
   
   //Views
   private var footerView: LoadingFooterView!
-  
-  lazy var searchController: UISearchController = {
-    let sc = UISearchController(searchResultsController: nil)
-    sc.searchBar.placeholder = "Search pokemon name here"
-    sc.searchBar.sizeToFit()
-    sc.searchBar.searchBarStyle = .prominent
-    return sc
-  }()
   
   lazy var tableView: UITableView = {
     let tv = UITableView(frame: .zero)
@@ -61,12 +54,6 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     super.init()
   }
   
-  public override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    
-    navigationItem.titleView = searchBar
-  }
-  
   public override func viewDidLoad() {
     super.viewDidLoad()
     
@@ -78,17 +65,7 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     
     observe()
     
-    isLoading = true
-    useCase.loadItems()
-      .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
-      .observe(on: MainScheduler.instance)
-      .subscribe { [weak self] item in
-        guard let self = self else { return }
-        items = item
-        filteredItems = items
-        tableView.reloadData()
-        isLoading = false
-      }.disposed(by: disposeBag)
+    loadData()
     
   }
   
@@ -104,6 +81,27 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
       tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
       tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
     ])
+  }
+  
+  fileprivate func loadData() {
+    isLoading = true
+    showLoading()
+    useCase.loadItems()
+      .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
+      .observe(on: MainScheduler.instance)
+      .subscribe { [weak self]  item in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+          guard let self = self else { return }
+          
+          items = item
+          filteredItems = items
+          tableView.reloadData()
+          isLoading = false
+          
+          hideLoading()
+        }
+
+      }.disposed(by: disposeBag)
   }
   
   public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
@@ -128,22 +126,33 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     }
   }
   
+  fileprivate func showLoading() {
+    let progressHUD = MBProgressHUD.showAdded(to: self.view, animated: true)
+    progressHUD.mode = .indeterminate
+    progressHUD.label.text = "Loading"
+  }
+  
+  fileprivate func hideLoading() {
+    MBProgressHUD.hide(for: self.view, animated: true)
+  }
+  
+  public func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
+    return "Pokemon"
+  }
+  
+  
   private func observe() {
     searchBar.rx.text.orEmpty
       .map { $0.lowercased() }
       .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
       .distinctUntilChanged()
       .observe(on: MainScheduler.instance)
-      .subscribe(onNext: {  [weak self] searchTxt in
+      .subscribe(onNext: { [weak self] searchTxt in
         guard let self = self else { return }
         filteredItems = searchTxt.isEmpty ? items : items.filter { $0.name.contains(searchTxt) }
         tableView.reloadData()
       })
       .disposed(by: disposeBag)
-  }
-  
-  public func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
-    return "Pokemon"
   }
   
   deinit {
