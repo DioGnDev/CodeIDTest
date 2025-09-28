@@ -7,5 +7,5 @@
 
 public protocol SignedInNavigator {
   func navigateToTab()
-  func navigateToDetail(argument: String)
+  func navigateToDetail(name: String)
 }

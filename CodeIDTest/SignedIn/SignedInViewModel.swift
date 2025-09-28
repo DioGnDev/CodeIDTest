@@ -9,7 +9,20 @@ import RxSwift
 
 public enum SignedInView {
   case tab
-  case detail
+  case detail(String)
+}
+
+extension SignedInView: Equatable {
+  public static func ==(lhs: SignedInView, rhs: SignedInView) -> Bool {
+    switch (lhs, rhs) {
+    case (.tab, .tab):
+      return true
+    case let (.detail(l), .detail(r)):
+      return l == r
+    default:
+      return false
+    }
+  }
 }
 
 public typealias SignedInNavigationAction = NavigationAction<SignedInView>
@@ -22,8 +35,8 @@ public class SignedInViewModel {
     view.onNext(.present(view: .tab))
   }
   
-  public func navigateToDetail(argument: String) {
-    view.onNext(.present(view: .detail))
+  public func navigateToDetail(name: String) {
+    view.onNext(.present(view: .detail(name)))
   }
   
 }

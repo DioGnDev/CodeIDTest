@@ -7,11 +7,12 @@
 
 import RxSwift
 
-public protocol ListRemoteDataSource {
+public protocol PokemonRemoteDataSource {
   func fetchPokemon(next: String?) -> Observable<ItemModel>
+  func fetchDetail(param: String) -> Observable<DetailModel>
 }
 
-public struct ListRemoteDataSourceImpl: ListRemoteDataSource {
+public struct PokemonRemoteDataSourceImpl: PokemonRemoteDataSource {
   
   let service: Service
   
@@ -25,4 +26,16 @@ public struct ListRemoteDataSourceImpl: ListRemoteDataSource {
       withEncoding: .url
     )
   }
+  
+  public func fetchDetail(param: String) -> Observable<DetailModel> {
+    return self.service.request(
+      of: DetailModel.self,
+      with: Endpoint.POKEMON_DETAIL.appending(param),
+      withMethod: .get,
+      withHeaders: [:],
+      withParameter: [:],
+      withEncoding: .url
+    )
+  }
+  
 }

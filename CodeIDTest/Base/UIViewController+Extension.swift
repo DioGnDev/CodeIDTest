@@ -54,6 +54,32 @@ extension UIViewController {
     self.present(alert, animated: true, completion: nil)
   }
   
+  public func titleLabel(_ value: String) -> UILabel {
+    let titleLabel = UILabel()
+    titleLabel.text = value
+    titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+    titleLabel.textColor = UIColor.black
+    return titleLabel
+  }
+  
+  public func standardNavBar(title: String = "") {
+    navigationItem.leftBarButtonItems = [
+      UIBarButtonItem(
+        image: UIImage(systemName: "chevron.left")?
+          .withRenderingMode(.alwaysTemplate)
+          .withTintColor(.black),
+        style: .plain,
+        target: self,
+        action: #selector(didBack)
+      ),
+      UIBarButtonItem(customView: titleLabel(title))
+    ]
+  }
+  
+  @objc
+  open func didBack() {
+    navigationController?.popViewController(animated: true)
+  }
 }
 
 

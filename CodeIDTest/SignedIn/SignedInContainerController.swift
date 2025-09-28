@@ -12,22 +12,22 @@ public class SignedInContainerController: NiblessNavigationController {
   
   let viewModel: SignedInViewModel
   let pagerTabViewController: PokeTabViewController
-  let detailViewController: DetailViewController
+  let makeDetailViewController: (String) -> DetailViewController
+  
+  var detailViewController: DetailViewController?
   
   var disposeBag = DisposeBag()
   
   public init(
     viewModel: SignedInViewModel,
     pagerTabViewController: PokeTabViewController,
-    detailViewController: DetailViewController
+    makeDetailViewControllerFactory: @escaping (String) -> DetailViewController
   ) {
-    self.viewModel = SignedInViewModel()
+    self.viewModel = viewModel
     self.pagerTabViewController = pagerTabViewController
-    self.detailViewController = detailViewController
+    self.makeDetailViewController = makeDetailViewControllerFactory
     
     super.init()
-    
-    self.delegate = self
   }
   
   public override func viewDidLoad() {
@@ -44,7 +44,10 @@ public class SignedInContainerController: NiblessNavigationController {
           self.respond(navigation)
         },
         onError: { _ in
-          
+          GLogger(.info, layer: "presentation", message: "error")
+        },
+        onCompleted: {
+          GLogger(.info, layer: "presentation", message: "completed")
         }
       )
       .disposed(by: disposeBag)
@@ -63,8 +66,8 @@ public class SignedInContainerController: NiblessNavigationController {
     switch view {
     case .tab:
       presentPagerTab()
-    case .detail:
-      presentDetail()
+    case .detail(let name):
+      presentDetail(name: name)
     }
   }
   
@@ -72,28 +75,8 @@ public class SignedInContainerController: NiblessNavigationController {
     pushViewController(pagerTabViewController, animated: true)
   }
   
-  private func presentDetail() {
-    pushViewController(detailViewController, animated: true)
-  }
-  
-}
-
-extension SignedInContainerController: UINavigationControllerDelegate {
-  
-  public func navigationController(
-    _ navigationController: UINavigationController,
-    willShow viewController: UIViewController,
-    animated: Bool
-  ) {
-    setNavigationBarHidden(true, animated: false)
-  }
-  
-  public func navigationController(
-    _ navigationController: UINavigationController,
-    didShow viewController: UIViewController,
-    animated: Bool
-  ) {
-    setNavigationBarHidden(true, animated: false)
+  private func presentDetail(name: String) {
+    pushViewController(makeDetailViewController(name), animated: true)
   }
   
 }

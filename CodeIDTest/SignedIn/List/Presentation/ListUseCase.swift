@@ -10,7 +10,7 @@ import RxSwift
 
 public class ListUseCase {
   
-  let repository: ListRepository
+  let repository: PokemonRepository
   let cache: CachedRepository
   
   var pagination: PaginationModel!
@@ -18,7 +18,7 @@ public class ListUseCase {
   private var disposeBag = DisposeBag()
   
   public init(
-    repository: ListRepository,
+    repository: PokemonRepository,
     cache: CachedRepository
   ) {
     self.repository = repository

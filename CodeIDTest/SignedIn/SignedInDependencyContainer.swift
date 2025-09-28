@@ -18,17 +18,22 @@ public class SignedInDependencyContainer {
   
   public init(dependencyInjection: AppDependencyContainer) {
     self.context = dependencyInjection.context
-    self.sharedViewModel = SignedInViewModel()
     self.service = dependencyInjection.service
+    self.sharedViewModel = SignedInViewModel()
   }
   
   //MARK: - Make ViewController
   
   public func makeViewController() -> SignedInContainerController {
+    
+    let detailFactory = { arg in
+      self.makeDetailViewController(name: arg)
+    }
+    
     return SignedInContainerController(
       viewModel: sharedViewModel,
       pagerTabViewController: makePokeTabViewController(),
-      detailViewController: makeDetailViewController()
+      makeDetailViewControllerFactory: detailFactory
     )
   }
   
@@ -47,36 +52,36 @@ public class SignedInDependencyContainer {
     )
   }
   
-//  private func makeListViewController() -> ListViewController {
-//    func makeRemote() -> ListRemoteDataSource {
-//      return ListRemoteDataSourceImpl(service: service)
-//    }
-//    
-//    func makeRepository() -> ListRepository {
-//      return ListRepositoryImpl(remote: makeRemote())
-//    }
-//    
-//    func makeCachedRepository() -> CachedRepository {
-//      return CachedRepositoryImpl(context: context)
-//    }
-//    
-//    func makeUseCase() -> ListUseCase {
-//      return ListUseCase(
-//        repository: makeRepository(),
-//        cache: makeCachedRepository()
-//      )
-//    }
-//    
-//    return ListViewController(useCase: makeUseCase())
-//  }
+  //  private func makeListViewController() -> ListViewController {
+  //    func makeRemote() -> ListRemoteDataSource {
+  //      return ListRemoteDataSourceImpl(service: service)
+  //    }
+  //
+  //    func makeRepository() -> ListRepository {
+  //      return ListRepositoryImpl(remote: makeRemote())
+  //    }
+  //
+  //    func makeCachedRepository() -> CachedRepository {
+  //      return CachedRepositoryImpl(context: context)
+  //    }
+  //
+  //    func makeUseCase() -> ListUseCase {
+  //      return ListUseCase(
+  //        repository: makeRepository(),
+  //        cache: makeCachedRepository()
+  //      )
+  //    }
+  //
+  //    return ListViewController(useCase: makeUseCase())
+  //  }
   
   private func makePokeListViewController() -> PokeListViewController {
-    func makeRemote() -> ListRemoteDataSource {
-      return ListRemoteDataSourceImpl(service: service)
+    func makeRemote() -> PokemonRemoteDataSource {
+      return PokemonRemoteDataSourceImpl(service: service)
     }
     
-    func makeRepository() -> ListRepository {
-      return ListRepositoryImpl(remote: makeRemote())
+    func makeRepository() -> PokemonRepository {
+      return PokemonRepositoryImpl(remote: makeRemote())
     }
     
     func makeCachedRepository() -> CachedRepository {
@@ -90,11 +95,26 @@ public class SignedInDependencyContainer {
       )
     }
     
-    return PokeListViewController(useCase: makeUseCase())
+    return PokeListViewController(
+      useCase: makeUseCase(),
+      navigator: sharedViewModel
+    )
   }
   
-  private func makeDetailViewController() -> DetailViewController {
-    return DetailViewController()
+  private func makeDetailViewController(name: String) -> DetailViewController {
+    func makeRemote() -> PokemonRemoteDataSource {
+      return PokemonRemoteDataSourceImpl(service: service)
+    }
+    
+    func makeRepo() -> PokemonRepository {
+      return PokemonRepositoryImpl(remote: makeRemote())
+    }
+    
+    func makeUseCase() -> DetailUseCase {
+      return DetailUseCase(repo: makeRepo())
+    }
+    
+    return DetailViewController(name: name, useCase: makeUseCase())
   }
   
   private func makeProfileViewController() -> ProfileViewController {

@@ -14,14 +14,26 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
   
   //Dependency
   let useCase: ListUseCase
+  let navigator: SignedInNavigator
   
   //Property
   var items: [PokeEntity] = []
+  var filteredItems: [PokeEntity] = []
   var isLoading: Bool = false
   
+  //State
   private let disposeBag = DisposeBag()
   
+  //Views
   private var footerView: LoadingFooterView!
+  
+  lazy var searchController: UISearchController = {
+    let sc = UISearchController(searchResultsController: nil)
+    sc.searchBar.placeholder = "Search pokemon name here"
+    sc.searchBar.sizeToFit()
+    sc.searchBar.searchBarStyle = .prominent
+    return sc
+  }()
   
   lazy var tableView: UITableView = {
     let tv = UITableView(frame: .zero)
@@ -31,13 +43,28 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     tv.backgroundColor = .white
     tv.translatesAutoresizingMaskIntoConstraints = false
     tv.tableFooterView = footerView
+    tv.tableHeaderView = searchBar
     return tv
   }()
   
-  public init(useCase: ListUseCase) {
+  private lazy var searchBar: UISearchBar = {
+    let sb = UISearchBar()
+    sb.placeholder = "Search Pokémon"
+    sb.sizeToFit()
+    return sb
+  }()
+  
+  public init(useCase: ListUseCase, navigator: SignedInNavigator) {
     self.useCase = useCase
+    self.navigator = navigator
     
     super.init()
+  }
+  
+  public override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    
+    navigationItem.titleView = searchBar
   }
   
   public override func viewDidLoad() {
@@ -49,15 +76,20 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
     
     setupView()
     
+    observe()
+    
     isLoading = true
     useCase.loadItems()
       .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
       .observe(on: MainScheduler.instance)
       .subscribe { [weak self] item in
-        self?.items = item
-        self?.tableView.reloadData()
-        self?.isLoading = false
+        guard let self = self else { return }
+        items = item
+        filteredItems = items
+        tableView.reloadData()
+        isLoading = false
       }.disposed(by: disposeBag)
+    
   }
   
   private func setupView() {
@@ -85,13 +117,29 @@ public class PokeListViewController: NiblessViewController, IndicatorInfoProvide
           .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
           .observe(on: MainScheduler.instance)
           .subscribe { [weak self] item in
-            self?.items.append(contentsOf: item)
-            self?.tableView.reloadData()
-            self?.footerView.stopLoading()
-            self?.isLoading = false
+            guard let self = self else { return }
+            items.append(contentsOf: item)
+            filteredItems = items
+            footerView.stopLoading()
+            isLoading = false
+            tableView.reloadData()
           }.disposed(by: disposeBag)
       }
     }
+  }
+  
+  private func observe() {
+    searchBar.rx.text.orEmpty
+      .map { $0.lowercased() }
+      .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+      .distinctUntilChanged()
+      .observe(on: MainScheduler.instance)
+      .subscribe(onNext: {  [weak self] searchTxt in
+        guard let self = self else { return }
+        filteredItems = searchTxt.isEmpty ? items : items.filter { $0.name.contains(searchTxt) }
+        tableView.reloadData()
+      })
+      .disposed(by: disposeBag)
   }
   
   public func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
@@ -114,7 +162,7 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
     _ tableView: UITableView,
     numberOfRowsInSection section: Int
   ) -> Int {
-    return items.count
+    return filteredItems.count
   }
   
   public func tableView(
@@ -122,11 +170,20 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
     cellForRowAt indexPath: IndexPath
   ) -> UITableViewCell {
     
-    let item = items[indexPath.row]
+    let item = filteredItems[indexPath.row]
     let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
     cell.textLabel?.text = item.name
     
     return cell
+  }
+  
+  public func tableView(
+    _ tableView: UITableView,
+    didSelectRowAt indexPath: IndexPath
+  ) {
+    let selectedEntity = filteredItems[indexPath.row]
+    navigator.navigateToDetail(name: selectedEntity.name)
+    tableView.deselectRow(at: indexPath, animated: true)
   }
   
   public func tableView(
@@ -142,10 +199,12 @@ extension PokeListViewController: UITableViewDataSource, UITableViewDelegate {
           .subscribe(on: ConcurrentDispatchQueueScheduler(qos: .userInitiated))
           .observe(on: MainScheduler.instance)
           .subscribe { [weak self] item in
-            self?.items.append(contentsOf: item)
-            self?.tableView.reloadData()
-            self?.footerView.stopLoading()
-            self?.isLoading = false
+            guard let self = self else { return }
+            items.append(contentsOf: item)
+            filteredItems = items
+            footerView.stopLoading()
+            isLoading = false
+            tableView.reloadData()
           }.disposed(by: disposeBag)
       }
     }
