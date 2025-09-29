@@ -134,8 +134,11 @@ public class RegisterViewController: NiblessViewController {
   
   fileprivate func showLoading() {
     let progressHUD = MBProgressHUD.showAdded(to: self.view, animated: true)
-    progressHUD.mode = .indeterminate
+    progressHUD.mode = .annularDeterminate
     progressHUD.label.text = "Loading"
+    progressHUD.completionBlock = { [weak self] in
+      self?.navigator.navigateToLogin()
+    }
   }
   
   fileprivate func hideLoading() {
@@ -176,7 +179,6 @@ public class RegisterViewController: NiblessViewController {
       password: password
     )
     .subscribe { [weak self] _ in
-      self?.navigator.navigateToLogin()
       self?.hideLoading()
     } onFailure: { [weak self] error in
       guard let error = error as? ErrorMessage else { return }
