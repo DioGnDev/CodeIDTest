@@ -38,7 +38,7 @@ public class LoginViewController: NiblessViewController {
     return tf
   }()
   
-  let passwordField : UITextField = {
+  private let passwordField : UITextField = {
     let tf = UITextField()
     tf.borderStyle = .roundedRect
     tf.isSecureTextEntry = true
@@ -50,7 +50,7 @@ public class LoginViewController: NiblessViewController {
     return tf
   }()
   
-  let loginButton: UIButton = {
+  private let loginButton: UIButton = {
     let button = UIButton(type: .system)
     button.setTitle("Masuk", for: .normal)
     button.layer.cornerRadius = 8
@@ -59,13 +59,22 @@ public class LoginViewController: NiblessViewController {
     return button
   }()
   
-  let registerButton: UIButton = {
+  private let registerButton: UIButton = {
     let button = UIButton(type: .system)
     button.setTitle("Daftar", for: .normal)
+    button.setTitleColor(.white, for: .normal)
     button.layer.cornerRadius = 8
     button.isEnabled = true
     button.translatesAutoresizingMaskIntoConstraints = false
     return button
+  }()
+  
+  private let containerView: UIView = {
+    let view = UIView()
+    view.backgroundColor = UIColor.primaryColor
+    view.layer.cornerRadius = 8
+    view.translatesAutoresizingMaskIntoConstraints = false
+    return view
   }()
   
   public init(useCase: LoginUseCase, navigator: AppNavigator) {
@@ -100,14 +109,19 @@ public class LoginViewController: NiblessViewController {
     stackView.addArrangedSubview(registerButton)
     
     view.addSubview(label)
-    view.addSubview(stackView)
+    view.addSubview(containerView)
+    containerView.addSubview(stackView)
     
     NSLayoutConstraint.activate([
-      label.bottomAnchor.constraint(equalTo: stackView.topAnchor, constant: -24),
+      label.bottomAnchor.constraint(equalTo: containerView.topAnchor, constant: -24),
       label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-      stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-      stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-      stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+      containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+      containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+      containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+      containerView.heightAnchor.constraint(equalToConstant: 230),
+      stackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 24),
+      stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
+      stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -24)
     ])
     
     usernameField.heightAnchor.constraint(equalToConstant: 40).isActive = true

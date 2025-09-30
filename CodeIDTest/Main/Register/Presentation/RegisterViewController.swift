@@ -76,8 +76,17 @@ public class RegisterViewController: NiblessViewController {
     button.setTitle("Masuk", for: .normal)
     button.layer.cornerRadius = 8
     button.isEnabled = true
+    button.setTitleColor(.white, for: .normal)
     button.translatesAutoresizingMaskIntoConstraints = false
     return button
+  }()
+  
+  private let containerView: UIView = {
+    let view = UIView()
+    view.backgroundColor = UIColor.primaryColor
+    view.layer.cornerRadius = 8
+    view.translatesAutoresizingMaskIntoConstraints = false
+    return view
   }()
   
   public init(useCase: RegisterUseCase, navigator: AppNavigator) {
@@ -113,14 +122,19 @@ public class RegisterViewController: NiblessViewController {
     stackView.addArrangedSubview(loginButton)
     
     view.addSubview(label)
-    view.addSubview(stackView)
+    view.addSubview(containerView)
+    containerView.addSubview(stackView)
     
     NSLayoutConstraint.activate([
-      label.bottomAnchor.constraint(equalTo: stackView.topAnchor, constant: -24),
+      label.bottomAnchor.constraint(equalTo: containerView.topAnchor, constant: -24),
       label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-      stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-      stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-      stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+      containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+      containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+      containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+      containerView.heightAnchor.constraint(equalToConstant: 300),
+      stackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 24),
+      stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
+      stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -24)
     ])
     
     usernameField.heightAnchor.constraint(equalToConstant: 40).isActive = true
